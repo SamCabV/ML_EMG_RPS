@@ -1,19 +1,25 @@
 Classifier,F1 Score,Accuracy
-AdaBoostClassifierCross_val,0.33803303912616867,0.40103986135181974
-AdaBoostClassifierResub,0.277962626970224,0.3462738301559792
-AdaBoostClassifierTest,0.280798576368912,0.35
-BaggingClassifierCross_val,0.878759524409135,0.8788561525129983
-BaggingClassifierResub,0.9958401431621703,0.9958405545927209
-BaggingClassifierTest,0.9115665255182713,0.9115
-ExtraTreesClassifierCross_val,0.8955628580924173,0.8956672443674176
+AdaBoostClassifierCross_val,0.3306191828122123,0.39834163387842425
+AdaBoostClassifierResub,0.4151942207868865,0.45706698141044555
+AdaBoostClassifierTest,0.3928725204242426,0.44176706827309237
+BaggingClassifierCross_val,0.7326109793764382,0.732661010967177
+BaggingClassifierResub,0.987900954873195,0.9879020359988198
+BaggingClassifierTest,0.758619740976251,0.7590361445783133
+ExtraTreesClassifierCross_val,0.7539477998907049,0.7539038705376401
 ExtraTreesClassifierResub,1.0,1.0
-ExtraTreesClassifierTest,0.928486874237707,0.9285
-GradientBoostingClassifierCross_val,0.7550636153596342,0.7551126516464471
-GradientBoostingClassifierResub,0.8278279693029494,0.8277296360485269
-GradientBoostingClassifierTest,0.744842372217459,0.7445
-HistGradientBoostingClassifierCross_val,0.7914678076756887,0.7923743500866551
-HistGradientBoostingClassifierResub,0.7869181871395347,0.788734835355286
-HistGradientBoostingClassifierTest,0.6949449361181733,0.696
-RandomForestClassifierCross_val,0.8923134386833482,0.8923743500866552
-RandomForestClassifierResub,1.0,1.0
-RandomForestClassifierTest,0.9190094338397621,0.919
+ExtraTreesClassifierTest,0.7450149729765074,0.7449799196787149
+GradientBoostingClassifierCross_val,0.7003445102211562,0.7007895321629782
+GradientBoostingClassifierResub,0.8283223814657411,0.8282679256417822
+GradientBoostingClassifierTest,0.6975266272025095,0.6967871485943775
+HistGradientBoostingClassifierCross_val,0.7370729519268482,0.7376809889195348
+HistGradientBoostingClassifierResub,0.9787622189789201,0.9787547949247566
+HistGradientBoostingClassifierTest,0.7713537668235079,0.7710843373493976
+"RandomForestClassifier (Optimized) n=491, Max_leaf = 807Cross_val",0.7532470926152952,0.7533152072086204
+"RandomForestClassifier (Optimized) n=491, Max_leaf = 807Resub",1.0,1.0
+"RandomForestClassifier (Optimized) n=491, Max_leaf = 807Test",0.7532109845633917,0.7530120481927711
+"RandomForestClassifier n=200, Max_leaf = 400Cross_val",0.7558830912907382,0.7559705101894093
+"RandomForestClassifier n=200, Max_leaf = 400Resub",0.9881979799200447,0.9881971082915314
+"RandomForestClassifier n=200, Max_leaf = 400Test",0.7514760759912276,0.751004016064257
+"RandomForestClassifier (default) n=100, Max_leaf = NoneCross_val",0.7533987371207136,0.7533147714844686
+"RandomForestClassifier (default) n=100, Max_leaf = NoneResub",1.0,1.0
+"RandomForestClassifier (default) n=100, Max_leaf = NoneTest",0.7649020483130127,0.7650602409638554
