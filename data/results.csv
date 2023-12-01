@@ -1,0 +1,19 @@
+Classifier,F1 Score,Accuracy
+AdaBoostClassifierCross_val,0.33803303912616867,0.40103986135181974
+AdaBoostClassifierResub,0.277962626970224,0.3462738301559792
+AdaBoostClassifierTest,0.280798576368912,0.35
+BaggingClassifierCross_val,0.878759524409135,0.8788561525129983
+BaggingClassifierResub,0.9958401431621703,0.9958405545927209
+BaggingClassifierTest,0.9115665255182713,0.9115
+ExtraTreesClassifierCross_val,0.8955628580924173,0.8956672443674176
+ExtraTreesClassifierResub,1.0,1.0
+ExtraTreesClassifierTest,0.928486874237707,0.9285
+GradientBoostingClassifierCross_val,0.7550636153596342,0.7551126516464471
+GradientBoostingClassifierResub,0.8278279693029494,0.8277296360485269
+GradientBoostingClassifierTest,0.744842372217459,0.7445
+HistGradientBoostingClassifierCross_val,0.7914678076756887,0.7923743500866551
+HistGradientBoostingClassifierResub,0.7869181871395347,0.788734835355286
+HistGradientBoostingClassifierTest,0.6949449361181733,0.696
+RandomForestClassifierCross_val,0.8923134386833482,0.8923743500866552
+RandomForestClassifierResub,1.0,1.0
+RandomForestClassifierTest,0.9190094338397621,0.919

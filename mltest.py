@@ -9,7 +9,6 @@ import pandas as pd
 
 # Selecting the specified columns
 feature_table = pd.read_csv("new_data - Sheet1.csv")
-print("FUCK")
 labels = pd.read_csv("final_dataset_labels - Sheet1.csv")
 
 selected_columns = [4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19]
