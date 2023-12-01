@@ -11,12 +11,12 @@ class RunPythonModel:
     def __init__(self, modelPath):
         self.model = None # replace this with whatever code you need to load model
         # Example usage
-        self.included_features =  ['WL', 'RMS', 'MeanPower', 'var', 'SSC', 'MedianFreq']
+        self.included_features =  ['WL', 'RMS', 'MeanPower', 'var', 'SSI', 'MedianFreq']
         self.fs = 1000  # Sampling frequency
         self.model_file_name = 'my_random_forest_model.joblib'
         self.model = joblib.load(self.model_file_name)
         self.tags = {0: 'rock', 1: 'paper', 2: 'scissors', 3: 'Resting'}
-        self.featur_order = ['var', 'WL', 'RMS', 'SSC', 'MeanPower', "MedianFreq"]
+    
     def get_rps(self,data):
         """
         Function to take in data and return the rps. You can
@@ -25,31 +25,21 @@ class RunPythonModel:
         after putting the data through your model.
         """
 
-        #print(np.shape(data))
         transformed_data = transform_data(data)
-        #print(np.shape(transformed_data))
-        filtered_data = filter_data(transformed_data, fs) 
-        filtered_data = filtered_data.T
+        filtered_data = filter_data(transformed_data, fs)   
         feature_table = extract_features(filtered_data, self.included_features, self.fs)
-        print(feature_table)
-        feature_table['MeanPower'] = feature_table['MeanPower'].flatten()
-        feature_table['MedianFreq'] = feature_table['MedianFreq'].flatten()
-
-        matrix = np.column_stack([feature_table[feature] for feature in self.featur_order])
-        print(np.shape(matrix))
-        prediction = self.model.predict(matrix)
+        prediction = self.model.predict(feature_table)
         return self.tags[int(prediction[0])]
  
 
 def transform_data(lsl_data):
     # Assuming lsl_data is a numpy array of shape (1400, 6)
     # Select channels 1 through 4 (in Python indexing, these are 0 through 3)
-    selected_data = lsl_data[:, 1:5]
+    selected_data = lsl_data[:, 1:4]
 
     # Transpose the data to make it 4x1400
-    #transformed_data = selected_data.T
-    transformed_data = selected_data
-    
+    transformed_data = selected_data.T
+
     return transformed_data
 def highpass_filter(data, cutoff, fs):
     b, a = butter(1, cutoff / (0.5 * fs), btype='high')
@@ -70,77 +60,84 @@ def filter_data(data, fs):
 
 
 def waveform_length(data):
-    # Assuming data is a 2D array of shape (trials, channels)
-    return np.sum(np.abs(np.diff(data, axis=0)), axis=0)
+    # data shape is assumed to be (channels, time, trials)
+    return np.sum(np.abs(np.diff(data, axis=1)), axis=1)
 
 def root_mean_square(data):
-    # Assuming data is a 2D array of shape (trials, channels)
-    return np.sqrt(np.mean(np.square(data), axis=0))
-
+    return np.sqrt(np.mean(np.square(data), axis=1))
 
 def mean_power(data, fs):
-    num_channels = data.shape[1]  # Number of channels
-    power_values = np.zeros(num_channels)
+    num_trials = data.shape[2]
+    num_channels = data.shape[0]
+    fvalues = np.zeros((num_channels, num_trials))
 
     for ch in range(num_channels):
-        signal = data[:, ch]
-        if signal.size == 0:
-            continue
-        power_spectrum = np.abs(fft(signal))**2 / len(signal)
-        power_values[ch] = np.mean(power_spectrum)
+        for tr in range(num_trials):
+            signal = data[ch, :, tr]
+            power_spectrum = np.abs(fft(signal))**2 / len(signal)
+            fvalues[ch, tr] = np.mean(power_spectrum)
     
-    return power_values
+    return fvalues.T  # Transposing to match the expected dimensions (trials, channels)
 
 
-
-# Assuming dataChTimeTr is a 3D NumPy array (channels x timepoints x trials)
-# and included_features is a list of strings indicating which features to extract
 def variance(data):
-    # Assuming data is a 2D array of shape (trials, channels)
-    return np.var(data, axis=0)
+    return np.var(data, axis=1)
 
 def slope_sign_change(data):
-    diff_data = np.diff(data, axis=0)
-    return np.sum(np.multiply(diff_data[:-1, :], diff_data[1:, :]) < 0, axis=0)
+    diff_data = np.diff(data, axis=1)
+    return np.sum(np.multiply(diff_data[:, :-1], diff_data[:, 1:]) < 0, axis=1)
 
 def simple_square_integral(data):
     return np.sum(np.square(data), axis=1)
 
 def median_frequency(data, fs):
-    num_channels = data.shape[1]
-    median_freq_values = np.zeros(num_channels)
+    num_trials = data.shape[2]
+    num_channels = data.shape[0]
+    fvalues = np.zeros((num_channels, num_trials))
 
     for ch in range(num_channels):
-        signal = data[:, ch]
-        if signal.size == 0:
-            continue
-        power_spectrum = np.abs(fft(signal))**2 / len(signal)
-        cumulative_sum = np.cumsum(power_spectrum)
-        total_power = cumulative_sum[-1]
-        median_index = np.where(cumulative_sum >= total_power / 2)[0][0]
-        median_freq = (median_index - 1) * fs / len(signal)
-        median_freq_values[ch] = median_freq
-    
-    return median_freq_values
+        for tr in range(num_trials):
+            signal = data[ch, :, tr]
+            power_spectrum = np.abs(fft(signal))**2 / len(signal)
+            cumulative_sum = np.cumsum(power_spectrum)
+            total_power = cumulative_sum[-1]
+            median_index = np.where(cumulative_sum >= total_power / 2)[0][0]
+            median_freq = (median_index - 1) * fs / len(signal)
+            fvalues[ch, tr] = median_freq
 
+    return fvalues.T
 
-
-def extract_features(data, included_features, fs):
+def extract_features(dataChTimeTr, included_features, fs):
     feature_table = {}
+    num_channels = dataChTimeTr.shape[0]  # Assuming the first dimension is the number of channels
 
     for feature in included_features:
         if feature == 'WL':
-            feature_table['WL'] = waveform_length(data)
+            wl_values = waveform_length(dataChTimeTr)
+            for ch in range(num_channels):
+                feature_table[f'WL_{ch+1}'] = wl_values[ch]
         elif feature == 'RMS':
-            feature_table['RMS'] = root_mean_square(data)
+            rms_values = root_mean_square(dataChTimeTr)
+            for ch in range(num_channels):
+                feature_table[f'RMS_{ch+1}'] = rms_values[ch]
         elif feature == 'MeanPower':
-            feature_table['MeanPower'] = mean_power(data, fs)
+            mean_power_values = mean_power(dataChTimeTr, fs)
+            for ch in range(num_channels):
+                feature_table[f'MeanPower_{ch+1}'] = mean_power_values[ch]
         elif feature == 'var':
-            feature_table['var'] = variance(data)
+            variance_val = variance(dataChTimeTr)
+            for ch in range(num_channels):
+                feature_table[f'var_{ch+1}'] = variance_val[ch]
         elif feature == 'SSC':
-            feature_table['SSC'] = slope_sign_change(data)
+            ssc_val = slope_sign_change(dataChTimeTr)
+            for ch in range(num_channels):
+                feature_table[f'SSC_{ch+1}'] = ssc_val[ch]
         elif feature == 'MedianFreq':
-            feature_table['MedianFreq'] = median_frequency(data, fs)
+            median_freq_val = median_frequency(dataChTimeTr, fs)
+            for ch in range(num_channels):
+                feature_table[f'MedianFreq_{ch+1}'] = median_freq_val[ch]
+            #feature_table['MedianFreq'] = median_frequency(dataChTimeTr, fs)
+        # Add more elif cases here for other features
 
     return feature_table
 
