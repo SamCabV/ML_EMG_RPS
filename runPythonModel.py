@@ -25,8 +25,10 @@ class RunPythonModel:
         after putting the data through your model.
         """
 
-        transformed_data = transform_data(data)
-        filtered_data = filter_data(transformed_data, fs)   
+        transformed_data = transform_data(data).T
+        filtered_data = filter_data(transformed_data, fs).T
+        print(np.shape(filtered_data))
+
         feature_table = extract_features(filtered_data, self.included_features, self.fs)
         prediction = self.model.predict(feature_table)
         return self.tags[int(prediction[0])]
@@ -67,15 +69,15 @@ def root_mean_square(data):
     return np.sqrt(np.mean(np.square(data), axis=1))
 
 def mean_power(data, fs):
-    num_trials = data.shape[2]
+    num_trials = 1
     num_channels = data.shape[0]
     fvalues = np.zeros((num_channels, num_trials))
 
     for ch in range(num_channels):
-        for tr in range(num_trials):
-            signal = data[ch, :, tr]
-            power_spectrum = np.abs(fft(signal))**2 / len(signal)
-            fvalues[ch, tr] = np.mean(power_spectrum)
+        signal = data[ch, :]
+        power_spectrum = np.abs(fft(signal))**2 / len(signal)
+        print(np.shape(power_spectrum))
+        fvalues[ch] = np.mean(power_spectrum, axis=1)
     
     return fvalues.T  # Transposing to match the expected dimensions (trials, channels)
 
@@ -91,13 +93,13 @@ def simple_square_integral(data):
     return np.sum(np.square(data), axis=1)
 
 def median_frequency(data, fs):
-    num_trials = data.shape[2]
+    num_trials = 1
     num_channels = data.shape[0]
     fvalues = np.zeros((num_channels, num_trials))
 
     for ch in range(num_channels):
         for tr in range(num_trials):
-            signal = data[ch, :, tr]
+            signal = data[ch, :]
             power_spectrum = np.abs(fft(signal))**2 / len(signal)
             cumulative_sum = np.cumsum(power_spectrum)
             total_power = cumulative_sum[-1]
@@ -123,6 +125,7 @@ def extract_features(dataChTimeTr, included_features, fs):
         elif feature == 'MeanPower':
             mean_power_values = mean_power(dataChTimeTr, fs)
             for ch in range(num_channels):
+                print(np.shape(mean_power_values))
                 feature_table[f'MeanPower_{ch+1}'] = mean_power_values[ch]
         elif feature == 'var':
             variance_val = variance(dataChTimeTr)
